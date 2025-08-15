@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>paimon_joe</title>
+    <link rel="icon" href="img/favi.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow-y: hidden;
+            overflow-x: auto;
+            height: 100vh;
+            background: #000000;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 手機版封鎖畫面 */
+        #mobile-blocker {
+            display: none; /* 電腦版預設隱藏 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000000;
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        #mobile-blocker img {
+            max-width: 80%;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            transition: transform 0.1s ease-out;
+        }
+
+        .section {
+            min-width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin: 0 -505px 0 0; /* 修正了 margin 單位 */
+            padding: 0; /* 修正了無效的 padding */
+           
+        }
+
+        .image-container {
+            width: 50%;
+            height: calc(100vh - 140px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .section img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+
+
+
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: translateY(-50%) scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: translateY(-50%) scale(1.1);
+            }
+        }
+
+        /* 搖晃動畫 */
+        @keyframes shake {
+            10%, 90% {
+                transform: translateX(-50%) translateX(-2px);
+            }
+            20%, 80% {
+                transform: translateX(-50%) translateX(2px);
+            }
+            30%, 50%, 70% {
+                transform: translateX(-50%) translateX(-4px);
+            }
+            40%, 60% {
+                transform: translateX(-50%) translateX(4px);
+            }
+        }
+
+        /* 用於觸發搖晃動畫的 class */
+        .shake {
+            animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        .auto-scroll-toggle {
+            position: fixed;
+            top: 91.7%;
+            left: -1%;
+            z-index: 1000;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .reset-button {
+            position: fixed;
+            top: 8%;
+            left: 3.7%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            width: 9.5%;
+            transition: transform 0.2s ease-in-out; /* 為了平滑的 hover 效果 */
+        }
+
+        /* 滑鼠懸停時放大 */
+        .reset-button:hover {
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        /* 按下時稍微縮小，提供即時反饋 */
+        .reset-button:active {
+            transform: translateX(-50%) scale(0.95);
+        }
+
+        .toggle-icon,
+        .reset-icon,
+        #musicIcon {
+            width: 50%;
+            cursor: pointer;
+        }
+
+        .music-toggle-button {
+            position: fixed;
+            top: 94%;
+            left: -1%;
+            z-index: 1000;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .intro {
+            position: fixed;
+            top: 3%;
+            left: 1.7%;
+            z-index: 1000;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            color: white;
+            font-family: Space Grotesk;
+            font-size: 13px;
+            line-height: 21px;
+            text-align: left;
+        }
+        .intro2 {
+            position: fixed;
+            top: 3%;
+            right: 1.7%;
+            z-index: 1000;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            color: white;
+            font-family: Space Grotesk;
+            font-size: 13px;
+            line-height: 21px;
+            text-align: left;
+        }
+
+        /* 媒體查詢：當螢幕寬度小於或等於 768px 時 (手機/平板) */
+        @media (max-width: 768px) {
+            body {
+                overflow: hidden; /* 禁止在手機上滾動背景 */
+            }
+
+            /* 顯示封鎖畫面 */
+            #mobile-blocker {
+                display: flex;
+            }
+
+            /* 隱藏所有網站主要內容 */
+            .container, .auto-scroll-toggle, .reset-button, .music-toggle-button, .intro, .intro2 {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 手機版封鎖畫面 -->
+    <div id="mobile-blocker">
+        <!-- 請將 src 替換成您想顯示的圖片路徑 -->
+        
+        <p>請使用電腦瀏覽以獲得最佳體驗</p>
+    </div>
+
+    <!-- 背景音樂 -->
+    <audio id="backgroundMusic" src="music.mp3" autoplay loop></audio>
+
+    <button class="auto-scroll-toggle" id="autoScrollToggle">
+        <img class="toggle-icon" id="toggleIcon" src="img/reset.png" alt="播放">
+    </button>
+
+    <button class="reset-button" id="resetButton">
+        <img class="reset-icon" src="img/reset.png" alt="回到開始">
+    </button>
+
+    <button class="music-toggle-button" id="musicToggleButton">
+        <img id="musicIcon" src="img/Audio_On.png" alt="音樂開關">
+    </button>
+    <div class="intro">
+
+    <p>SilverpineRange__BrocadeCanyon<br>
+Online__Photography__Album</p>
+
+    </div>
+
+    <div class="intro2">
+
+    <p>Design&Generate__Joe</p>
+    </div>
+
+    <div class="container" id="container">
+        <div class="section">
+            <div class="image-container">
+                <img src="img/01.png" alt="圖片 1">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="image-container">
+                <img src="img/02.png" alt="圖片 2" >
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="image-container">
+                <img src="img/03.png" alt="圖片 3">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="image-container">
+                <img src="img/04.png" alt="圖片 4">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="image-container">
+                <img src="img/05.png" alt="圖片 5" >
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="image-container">
+                <img src="img/06.png" alt="圖片 6" >
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="image-container">
+                <img src="img/07.png" alt="圖片 7" >
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="image-container">
+                <img src="img/08.png" alt="圖片 8">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="image-container">
+                <img src="img/09.png" alt="圖片 9">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="image-container">
+                <img src="img/10.png" alt="圖片 10">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="image-container">
+                <img src="img/11.png" alt="圖片 11">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="image-container">
+                <img src="img/12.png" alt="圖片 12" >
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="image-container">
+                <img src="img/13.png" alt="圖片 13">
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="image-container">
+                <img src="img/14.png" alt="圖片 14" >
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="image-container">
+                <img src="img/15.png" alt="圖片 15" >
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="image-container">
+                <img src="img/16.png" alt="圖片 16" >
+            </div>
+        </div>
+
+        
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+        const autoScrollToggle = document.getElementById('autoScrollToggle');
+        const resetButton = document.getElementById('resetButton');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const musicToggleButton = document.getElementById('musicToggleButton');
+        const musicIcon = document.getElementById('musicIcon');
+
+        let currentPosition = 0;
+        let isAutoScrolling = true;
+        let autoScrollSpeed = 0.13; // 降低自動滑動速度
+        let maxPosition = 985;
+
+        // 播放和暫停圖標的SVG
+        const playIcon = "img/Auto_On.png ";
+        const pauseIcon = "img/Auto_Off.png";
+        const soundOnIcon = "img/Audio_On.png";
+        const soundOffIcon = "img/Audio_Off.png";
+
+        // 自動滑動功能
+        function autoScroll() {
+            if (isAutoScrolling) {
+                currentPosition += autoScrollSpeed * 0.3;
+                // 移除自動回到開始的邏輯
+                if (currentPosition >= maxPosition) {
+                    currentPosition = maxPosition; // 停在最後一張圖片
+                }
+                updatePosition();
+            }
+            requestAnimationFrame(autoScroll);
+        }
+
+        // 更新位置
+        function updatePosition() {
+            container.style.transform = `translateX(-${currentPosition}vw)`;
+        }
+
+        // 滑鼠滾動事件（向下滾動 = 向右移動，速度放慢）
+        window.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            
+            const delta = e.deltaY;
+            const scrollSensitivity = 0.3; // 降低滾動敏感度
+            
+            currentPosition += delta * scrollSensitivity;
+            
+            if (currentPosition < 0) {
+                currentPosition = 0;
+            } else if (currentPosition > maxPosition) {
+                currentPosition = maxPosition;
+            }
+            
+            updatePosition();
+        }, { passive: false });
+
+        // 自動滑動開關
+        autoScrollToggle.addEventListener('click', () => {
+            isAutoScrolling = !isAutoScrolling;
+            toggleIcon.src = isAutoScrolling ? pauseIcon : playIcon;
+            toggleIcon.alt = isAutoScrolling ? "暫停" : "播放";
+        });
+
+        // 重置按鈕功能
+        resetButton.addEventListener('click', () => {
+            currentPosition = 0;
+            updatePosition();
+            // 點擊後為按鈕加上 'shake' class 來觸發動畫
+            resetButton.classList.add('shake');
+        });
+
+        // 監聽動畫結束事件，結束後移除 class，以便下次點擊能再次觸發
+        resetButton.addEventListener('animationend', () => {
+            resetButton.classList.remove('shake');
+        });
+
+        // 音樂開關功能
+        musicToggleButton.addEventListener('click', () => {
+            if (backgroundMusic.paused) {
+                backgroundMusic.play();
+            } else {
+                backgroundMusic.pause();
+            }
+        });
+
+        // 初始設置圖標為暫停（因為預設是自動播放）
+        toggleIcon.src = pauseIcon;
+
+        // 根據音樂播放狀態自動更新圖標
+        backgroundMusic.addEventListener('play', () => { musicIcon.src = soundOnIcon; });
+        backgroundMusic.addEventListener('pause', () => { musicIcon.src = soundOffIcon; });
+        // 初始設定音樂圖標
+        musicIcon.src = backgroundMusic.paused ? soundOffIcon : soundOnIcon;
+
+        // 鍵盤控制
+        window.addEventListener('keydown', (e) => {
+            const step = 8; // 降低鍵盤控制步進值
+            switch(e.key) {
+                case 'ArrowRight':
+                    currentPosition += step;
+                    break;
+                case 'ArrowLeft':
+                    currentPosition -= step;
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    isAutoScrolling = !isAutoScrolling;
+                    toggleIcon.src = isAutoScrolling ? pauseIcon : playIcon;
+                    toggleIcon.alt = isAutoScrolling ? "暫停" : "播放";
+                    break;
+            }
+            
+            if (currentPosition < 0) currentPosition = 0;
+            if (currentPosition > maxPosition) currentPosition = maxPosition;
+            
+            updatePosition();
+        });
+
+        // 觸摸設備支援
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        window.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touchCurrentX = e.touches[0].clientX;
+            const touchCurrentY = e.touches[0].clientY;
+            
+            const deltaX = touchStartX - touchCurrentX;
+            const deltaY = touchStartY - touchCurrentY;
+            
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                currentPosition += deltaX * 0.3; // 降低觸控敏感度
+                
+                if (currentPosition < 0) currentPosition = 0;
+                if (currentPosition > maxPosition) currentPosition = maxPosition;
+                
+                updatePosition();
+                
+                touchStartX = touchCurrentX;
+                touchStartY = touchCurrentY;
+            }
+        }, { passive: false });
+
+        // 開始自動滑動
+       setTimeout(() => {
+            autoScroll();
+        }, 1500);
+
+        // 初始化進度條
+        updatePosition();
+    </script>
+
+</body>
+</html>
